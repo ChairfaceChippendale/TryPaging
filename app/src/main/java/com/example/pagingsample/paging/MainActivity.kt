@@ -3,6 +3,7 @@ package com.example.pagingsample.paging
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
@@ -43,9 +44,12 @@ class MainActivity : AppCompatActivity() {
             .setFetchScheduler(Schedulers.newThread())
             .setNotifyScheduler(AndroidSchedulers.mainThread())
             .buildFlowable(BackpressureStrategy.BUFFER)
-            .subscribeBy(onNext = {
-                adapter.submitList(it)
-            })
+            .subscribeBy(
+                onNext = {
+                    adapter.submitList(it)
+                    Log.w("MYTAG", "${it.size}")
+                }
+            )
 
         rv_main.adapter = adapter
     }

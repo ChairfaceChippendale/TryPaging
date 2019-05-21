@@ -10,6 +10,8 @@ import com.example.pagingsample.database.EmployeeDbEntity
 class EmployeeAdapter :
     PagedListAdapter<EmployeeDbEntity, EmployeeViewHolder>(EmployeeDiffUtilCallback()) {
 
+    val selectedItemsIds: MutableList<Int> by lazy { ArrayList<Int>() }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmployeeViewHolder {
         return LayoutInflater
             .from(parent.context)
@@ -18,7 +20,11 @@ class EmployeeAdapter :
     }
 
     override fun onBindViewHolder(holder: EmployeeViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), getItem(position)?.id in selectedItemsIds ){id ->
+            val isRemoved = selectedItemsIds.removeAll { it == id }
+            if (!isRemoved) selectedItemsIds.add(id)
+            notifyItemChanged(position)
+        }
     }
 
     private class EmployeeDiffUtilCallback : DiffUtil.ItemCallback<EmployeeDbEntity>() {
