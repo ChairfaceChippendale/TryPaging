@@ -9,14 +9,14 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 
-class DbPositionDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDataSource<Long, Employee>() {
+class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDataSource<Long, Employee>() {
 
     private val disposable = CompositeDisposable()
 
     override fun loadInitial(params: LoadInitialParams<Long>, callback: LoadInitialCallback<Employee>) {
         disposable.add(
-            employeeDao.getFirst(params.requestedLoadSize)
-                .map { it.map { it.toEmployee() } }
+            employeeDao.getInitial(params.requestedLoadSize)
+                .map {list ->  list.map { it.toEmployee() } }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -31,19 +31,40 @@ class DbPositionDataSource(private val employeeDao: EmployeeDao) : ItemKeyedData
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Employee>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        disposable.add(
+            employeeDao.getAfter(params.requestedLoadSize, params.key)
+                .map {list ->  list.map { it.toEmployee() } }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        callback.onResult(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        )
     }
 
     override fun loadBefore(params: LoadParams<Long>, callback: LoadCallback<Employee>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        disposable.add(
+            employeeDao.getBefore(params.requestedLoadSize, params.key)
+                .map {list ->  list.map { it.toEmployee() } }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        callback.onResult(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        )
     }
 
     override fun getKey(item: Employee): Long = item.timeMilis
-
-    override fun invalidate() {
-        super.invalidate()
-    }
-
 
     fun clear() {
         disposable.dispose()

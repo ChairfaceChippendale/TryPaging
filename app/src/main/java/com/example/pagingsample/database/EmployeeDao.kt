@@ -1,27 +1,26 @@
 package com.example.pagingsample.database
 
-import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.reactivex.Single
 
 @Dao
 interface EmployeeDao {
 
-    @Query("SELECT * FROM employee")
-    fun getAll(): DataSource.Factory<Int, EmployeeDbEntity>
-
-    @Insert
-    fun insert(employee: EmployeeDbEntity)
-
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(employee: List<EmployeeDbEntity>)
 
 
-
-
     @Query("SELECT * FROM employee ORDER BY date LIMIT :elementCount")
-    fun getFirst(elementCount: Int): Single<List<EmployeeDbEntity>>
+    fun getInitial(elementCount: Int): Single<List<EmployeeDbEntity>>
+
+
+    @Query("SELECT * FROM employee WHERE date < :beforeDate ORDER BY date LIMIT :elementCount")
+    fun getBefore(elementCount: Int, beforeDate: Long): Single<List<EmployeeDbEntity>>
+
+    @Query("SELECT * FROM employee WHERE date > :afterDate ORDER BY date LIMIT :elementCount")
+    fun getAfter(elementCount: Int, afterDate: Long): Single<List<EmployeeDbEntity>>
 
 }

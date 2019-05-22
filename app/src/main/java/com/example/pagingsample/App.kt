@@ -28,25 +28,12 @@ class App : Application() {
         Stetho.initializeWithDefaults(this);
 
         val employees = mutableListOf<EmployeeDbEntity>()
-        val companies = mutableListOf<CompanyDbEntity>()
 
         val r = Random()
 
-        companies += CompanyDbEntity(0, "First company")
-        companies += CompanyDbEntity(1, "Second company")
-        companies += CompanyDbEntity(2, "Third company")
-
-        Completable.fromAction {
-            database.companyDao().insertAll(companies)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onError = {}
-            )
 
         for (i in 0..100) {
-            employees += EmployeeDbEntity(i.toString(), "Name $i", "Position $i", r.nextInt(3), 1514757600000 + 86_400_005 * i)
+            employees += EmployeeDbEntity(i.toString(), "Name $i", 1514757600000 + (8_000_000 * i))
         }
 
         Completable.fromAction {
