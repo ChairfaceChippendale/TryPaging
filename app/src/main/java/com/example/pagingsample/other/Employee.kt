@@ -1,5 +1,7 @@
 package com.example.pagingsample.other
 
+import com.example.pagingsample.database.EmployeeDao
+import com.example.pagingsample.database.EmployeeDbEntity
 import java.util.*
 
 
@@ -27,4 +29,14 @@ class Employee(
         MESSAGE_EMPLOYEE,
         MESSAGE_DATE
     }
+}
+
+fun EmployeeDbEntity.toEmployee(): Employee {
+    return Employee(
+        id = id,
+        name = name,
+        position = position,
+        timeMilis = date,
+        type = Employee.Type.MESSAGE_EMPLOYEE
+    )
 }

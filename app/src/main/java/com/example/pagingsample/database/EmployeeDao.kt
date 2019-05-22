@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import io.reactivex.Single
 
 @Dao
 interface EmployeeDao {
@@ -16,5 +17,11 @@ interface EmployeeDao {
 
     @Insert
     fun insertAll(employee: List<EmployeeDbEntity>)
+
+
+
+
+    @Query("SELECT * FROM employee ORDER BY date LIMIT :elementCount")
+    fun getFirst(elementCount: Int): Single<List<EmployeeDbEntity>>
 
 }
