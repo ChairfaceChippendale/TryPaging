@@ -6,7 +6,7 @@ class EmployeeStorage {
         val result = mutableListOf<Employee>()
 
         for(i in requestedStartPosition until requestedStartPosition + requestedLoadSize) {
-            result += Employee(i, "EmployeeEntity #$i", "Position #$i")
+            result += Employee(i.toString(), "EmployeeEntity #$i", "Position #$i")
         }
 
         return result

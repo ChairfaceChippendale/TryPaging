@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
+
         rv_main.adapter = adapter
     }
 }

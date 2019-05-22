@@ -46,7 +46,7 @@ class App : Application() {
             )
 
         for (i in 0..100) {
-            employees += EmployeeDbEntity(i, "Name $i", "Position $i", r.nextInt(3))
+            employees += EmployeeDbEntity(i.toString(), "Name $i", "Position $i", r.nextInt(3), 1514757600000 + 86_400_005 * i)
         }
 
         Completable.fromAction {
