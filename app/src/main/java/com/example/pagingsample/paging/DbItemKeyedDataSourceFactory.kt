@@ -7,9 +7,9 @@ import com.example.pagingsample.other.Employee
 
 class DbItemKeyedDataSourceFactory(
     private val employeeDao: EmployeeDao
-): DataSource.Factory<Long, Employee>() {
+): DataSource.Factory<Employee, Employee>() {
 
-    override fun create(): DataSource<Long, Employee> {
+    override fun create(): DataSource<Employee, Employee> {
         return DbItemKeyedDataSource(employeeDao)
     }
 }

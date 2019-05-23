@@ -1,6 +1,7 @@
 package com.example.pagingsample.paging
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +16,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         val factory = DbItemKeyedDataSourceFactory(App.instance.database.employeeDao())
 
-        RxPagedListBuilder<Long, Employee>(factory, config)
+        RxPagedListBuilder<Employee, Employee>(factory, config)
             .setFetchScheduler(Schedulers.newThread())
             .setNotifyScheduler(AndroidSchedulers.mainThread())
             .buildFlowable(BackpressureStrategy.BUFFER)
@@ -48,5 +51,11 @@ class MainActivity : AppCompatActivity() {
             )
 
         rv_main.adapter = adapter
+
+        scroll.setOnClickListener {
+            Log.w("MYTAG", "${adapter.itemCount}")
+            rv_main.scrollToPosition(adapter.itemCount-1)//bottom
+
+        }
     }
 }

@@ -103,7 +103,7 @@ class EmployeeAdapter :
             fun instDate(
                 parent: ViewGroup
             ): MessageViewHolder =
-                EmployeeViewHolder(parent.inflate(R.layout.vh_date))
+                DateBubbleViewHolder(parent.inflate(R.layout.vh_date))
         }
 
         abstract fun bind(model: Employee?, isSelected: Boolean, click: (String) -> Unit)
