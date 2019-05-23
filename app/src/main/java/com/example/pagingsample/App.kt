@@ -45,7 +45,7 @@ class App : Application() {
                 onError = {}
             )
 
-        for (i in 0..100) {
+        for (i in 0..10000) {
             employees += EmployeeDbEntity(i, "Name $i", "Position $i", r.nextInt(3))
         }
 

@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-val lm = LinearLayoutManager(this)
+
+        val lm = LinearLayoutManager(this)
         rv_main.layoutManager = lm
 
         val dataSource =
@@ -37,7 +38,8 @@ val lm = LinearLayoutManager(this)
 
         val config: PagedList.Config = PagedList.Config.Builder()
             .setEnablePlaceholders(true)
-            .setPageSize(10)
+            .setMaxSize(1000)
+            .setPageSize(50)
             .build()
 
         RxPagedListBuilder<Int, EmployeeDbEntity>(dataSource, config)
