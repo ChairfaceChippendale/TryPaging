@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.room.Room
 import com.example.pagingsample.database.AppDatabase
-import com.example.pagingsample.database.CompanyDbEntity
 import com.example.pagingsample.database.EmployeeDbEntity
 import com.facebook.stetho.Stetho
 import io.reactivex.Completable
@@ -29,12 +28,7 @@ class App : Application() {
 
         val employees = mutableListOf<EmployeeDbEntity>()
 
-        val r = Random()
-
-
-
-
-        for (i in 0..10000) {
+        for (i in 0..100) {
             employees += EmployeeDbEntity(i.toString(), "Name $i", 1514757600045 + (8_000_000 * i))
         }
 
