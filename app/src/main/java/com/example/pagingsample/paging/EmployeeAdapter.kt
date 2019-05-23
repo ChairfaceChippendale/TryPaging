@@ -48,7 +48,6 @@ class EmployeeAdapter :
         } ?: -1
     }
 
-
     //sticky header
     override fun getHeaderPositionForItem(position: Int): Int {
         var headerPosition = 0

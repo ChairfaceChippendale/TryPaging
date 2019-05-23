@@ -1,10 +1,8 @@
-package com.example.pagingsample.paging
+package com.example.pagingsample.other
 
 import android.util.Log
 import androidx.paging.ItemKeyedDataSource
 import com.example.pagingsample.database.EmployeeDao
-import com.example.pagingsample.other.Employee
-import com.example.pagingsample.other.toEmployee
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -19,7 +17,7 @@ class DbItemKeyedDataSource(
     private val disposable = CompositeDisposable()
 
     override fun loadInitial(params: LoadInitialParams<Employee>, callback: LoadInitialCallback<Employee>) {
-        disposable.add(
+        disposable.addAll(
             employeeDao.getInitial(params.requestedLoadSize)
                 .map {list ->  list.map { it.toEmployee() }.asReversed() }
                 .subscribeOn(Schedulers.io())

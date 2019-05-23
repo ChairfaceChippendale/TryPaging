@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pagingsample.App
 import com.example.pagingsample.R
+import com.example.pagingsample.other.DbItemKeyedDataSourceFactory
 import com.example.pagingsample.other.Employee
 import io.reactivex.BackpressureStrategy
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -58,16 +59,34 @@ class MainActivity : AppCompatActivity() {
             })
             .buildFlowable(BackpressureStrategy.BUFFER)
             .subscribeBy(
-                onNext = {
+                onNext = { list ->
+                    Log.w("MYTAG", "paged list")
 
-                    it.addWeakCallback(null, object: PagedList.Callback(){
+
+                    list.addWeakCallback(null, object: PagedList.Callback(){
                         override fun onChanged(position: Int, count: Int) {
                             Log.w("MYTAG", "onChanged pos: $position, count: $count")
                         }
 
                         override fun onInserted(position: Int, count: Int) {
                             Log.w("MYTAG", "onInserted pos: $position, count: $count")
-                            rv_main.scrollToBottom()
+                            if (count > 30) rv_main.scrollToBottom()
+
+
+                            App.instance.database.employeeDao().observe().skip(1)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeBy(
+                                    onNext = {
+                                        Log.w("MYTAG", "DB changed")
+                                        list.dataSource.invalidate()
+                                    },
+                                    onError = {
+                                        it.printStackTrace()
+                                    }
+                                )
+
+
 
                         }
 
@@ -75,18 +94,47 @@ class MainActivity : AppCompatActivity() {
                             Log.w("MYTAG", "onRemoved pos: $position, count: $count")
                         }
                     })
-                    adapter.submitList(it) },
+
+                    adapter.submitList(list)
+
+
+                },
                 onError = { it.printStackTrace() }
             )
 
+
+/*
+
+        employeeDao.observe()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    Log.w("MYTAG", "DB changed")
+                    d.invalidate()
+                },
+                onError = {
+                    it.printStackTrace()
+                }
+            )
+*/
 
         rv_main.layoutManager = LinearLayoutManager(this)
         rv_main.adapter = adapter
 
 
+        btn_update.setOnClickListener {
+            App.instance.database.employeeDao().getById("30")
+                .flatMapCompletable { App.instance.database.employeeDao().updateElement(it.copy(name = "updated"))  }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = { it.printStackTrace() },
+                    onComplete = { Log.w("MYTAG", " updated") }
+                )
+        }
 
-
-        scroll.setOnClickListener {
+        btn_scroll.setOnClickListener {
             Log.w("MYTAG", "${adapter.itemCount}")
             rv_main.scrollToPosition(adapter.itemCount-1)//bottom
 
