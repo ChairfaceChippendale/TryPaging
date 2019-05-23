@@ -13,14 +13,14 @@ interface EmployeeDao {
     fun insertAll(employee: List<EmployeeDbEntity>)
 
 
-    @Query("SELECT * FROM employee ORDER BY date LIMIT :elementCount")
+    @Query("SELECT * FROM employee ORDER BY date DESC LIMIT :elementCount")
     fun getInitial(elementCount: Int): Single<List<EmployeeDbEntity>>
 
 
-    @Query("SELECT * FROM employee WHERE date < :beforeDate ORDER BY date LIMIT :elementCount")
+    @Query("SELECT * FROM employee WHERE date < :beforeDate ORDER BY date DESC LIMIT :elementCount")
     fun getBefore(elementCount: Int, beforeDate: Long): Single<List<EmployeeDbEntity>>
 
-    @Query("SELECT * FROM employee WHERE date > :afterDate ORDER BY date LIMIT :elementCount")
+    @Query("SELECT * FROM employee WHERE date > :afterDate ORDER BY date DESC LIMIT :elementCount")
     fun getAfter(elementCount: Int, afterDate: Long): Single<List<EmployeeDbEntity>>
 
 }

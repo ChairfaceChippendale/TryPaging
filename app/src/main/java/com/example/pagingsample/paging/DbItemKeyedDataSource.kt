@@ -1,5 +1,6 @@
 package com.example.pagingsample.paging
 
+import android.util.Log
 import androidx.paging.ItemKeyedDataSource
 import com.example.pagingsample.database.EmployeeDao
 import com.example.pagingsample.other.Employee
@@ -18,11 +19,12 @@ class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDat
     override fun loadInitial(params: LoadInitialParams<Employee>, callback: LoadInitialCallback<Employee>) {
         disposable.add(
             employeeDao.getInitial(params.requestedLoadSize)
-                .map {list ->  list.map { it.toEmployee() } }
+                .map {list ->  list.map { it.toEmployee() }.asReversed() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
+                        Log.w("MYTAG", "loadInitial: ${it.size}")
                         callback.onResult(it.withDateHeaders(null))
                     },
                     onError = {
@@ -35,12 +37,13 @@ class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDat
     override fun loadAfter(params: LoadParams<Employee>, callback: LoadCallback<Employee>) {
         disposable.add(
             employeeDao.getAfter(params.requestedLoadSize, params.key.timeMilis)
-                .map {list ->  list.map { it.toEmployee() } }
+                .map {list ->  list.map { it.toEmployee() }.asReversed() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
-                        callback.onResult(it.withDateHeaders(params.key))
+                        Log.w("MYTAG", "loadAfter: ${it.size}")
+                        callback.onResult(it.withDateHeaders(null))
                     },
                     onError = {
                         it.printStackTrace()
@@ -53,12 +56,13 @@ class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDat
         val beforeDateMilis = params.key
         disposable.add(
             employeeDao.getBefore(params.requestedLoadSize, params.key.timeMilis)
-                .map {list ->  list.map { it.toEmployee() } }
+                .map {list ->  list.map { it.toEmployee() }.asReversed() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
-                        callback.onResult(it.withDateHeaders(null))
+                        Log.w("MYTAG", "loadBefore: ${it.size}")
+                        callback.onResult(it.withDateHeaders(params.key))
                     },
                     onError = {
                         it.printStackTrace()
@@ -74,15 +78,14 @@ class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDat
     }
 }
 
-fun List<Employee>.withDateHeaders(afterEmployee: Employee?): List<Employee> {
+fun List<Employee>.withDateHeaders(beforeEmployee: Employee?): List<Employee> {
 
     val datedList = ArrayList<Employee>()
 
 
     forEachIndexed { index, messageModel ->
-        val previous = this.getOrNull(index - 1) ?: afterEmployee
-        if (previous == null){
-            datedList.add(Employee.dateInst(messageModel.timeMilis - 1)) //to make it less then next item (in case of sort)
+        val next = this.getOrNull(index + 1) ?: beforeEmployee
+        if (next == null){
             datedList.add(messageModel)
         } else {
 
@@ -90,18 +93,18 @@ fun List<Employee>.withDateHeaders(afterEmployee: Employee?): List<Employee> {
                 timeInMillis = messageModel.timeMilis
             }
 
-            val previousCalendar = Calendar.getInstance().apply {
-                timeInMillis = previous.timeMilis
+            val nextCalendar = Calendar.getInstance().apply {
+                timeInMillis = next.timeMilis
             }
 
-            if ((thisCalendar.get(Calendar.YEAR) == previousCalendar.get(Calendar.YEAR) &&
-                        thisCalendar.get(Calendar.MONTH) == previousCalendar.get(Calendar.MONTH) &&
-                        thisCalendar.get(Calendar.DAY_OF_MONTH) == previousCalendar.get(Calendar.DAY_OF_MONTH)) //check whether the same date day
+            if ((thisCalendar.get(Calendar.YEAR) == nextCalendar.get(Calendar.YEAR) &&
+                        thisCalendar.get(Calendar.MONTH) == nextCalendar.get(Calendar.MONTH) &&
+                        thisCalendar.get(Calendar.DAY_OF_MONTH) == nextCalendar.get(Calendar.DAY_OF_MONTH)) //check whether the same date day
             ) {
                 datedList.add(messageModel)
             } else {
-                datedList.add(Employee.dateInst(messageModel.timeMilis)) //to make it less then next item (in case of sort)
                 datedList.add(messageModel)
+                datedList.add(Employee.dateInst(next.timeMilis + 1)) //to make it less then next item (in case of sort)
             }
         }
     }

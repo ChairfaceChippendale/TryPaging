@@ -49,6 +49,10 @@ class EmployeeAdapter :
     }
 
 
+
+
+
+    //sticky header
     override fun getHeaderPositionForItem(position: Int): Int {
         var headerPosition = 0
         for (i in position downTo 1) {
@@ -74,7 +78,7 @@ class EmployeeAdapter :
     }
 
 
-
+    //diffutils
     private class EmployeeDiffUtilCallback : DiffUtil.ItemCallback<Employee>() {
 
         override fun areItemsTheSame(oldItem: Employee, newItem: Employee): Boolean {
@@ -124,7 +128,7 @@ class EmployeeAdapter :
         }
     }
 
-    fun formatDate(time: Long, res: Resources): String {
+    private fun formatDate(time: Long, res: Resources): String {
         val dateTime = Calendar.getInstance()
         dateTime.timeInMillis = time
 
