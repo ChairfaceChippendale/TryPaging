@@ -40,20 +40,50 @@ class MainActivity : AppCompatActivity() {
         RxPagedListBuilder<Employee, Employee>(factory, config)
             .setFetchScheduler(Schedulers.newThread())
             .setNotifyScheduler(AndroidSchedulers.mainThread())
+            .setBoundaryCallback(object :PagedList.BoundaryCallback<Employee>(){
+                override fun onZeroItemsLoaded() {
+                    super.onZeroItemsLoaded()
+                    Log.w("MYTAG", "onZeroItemsLoaded")
+                }
+
+                override fun onItemAtEndLoaded(itemAtEnd: Employee) {
+                    super.onItemAtEndLoaded(itemAtEnd)
+                    Log.w("MYTAG", "onItemAtEndLoaded")
+                }
+
+                override fun onItemAtFrontLoaded(itemAtFront: Employee) {
+                    super.onItemAtFrontLoaded(itemAtFront)
+                    Log.w("MYTAG", "onItemAtFrontLoaded")
+                }
+            })
             .buildFlowable(BackpressureStrategy.BUFFER)
             .subscribeBy(
-                onNext = { adapter.submitList(it) },
+                onNext = {
+
+                    it.addWeakCallback(null, object: PagedList.Callback(){
+                        override fun onChanged(position: Int, count: Int) {
+                            Log.w("MYTAG", "onChanged pos: $position, count: $count")
+                        }
+
+                        override fun onInserted(position: Int, count: Int) {
+                            Log.w("MYTAG", "onInserted pos: $position, count: $count")
+                            rv_main.scrollToBottom()
+
+                        }
+
+                        override fun onRemoved(position: Int, count: Int) {
+                            Log.w("MYTAG", "onRemoved pos: $position, count: $count")
+                        }
+                    })
+                    adapter.submitList(it) },
                 onError = { it.printStackTrace() }
             )
 
 
         rv_main.layoutManager = LinearLayoutManager(this)
         rv_main.adapter = adapter
-//        rv_main.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
-//            if (bottom < oldBottom && isBottomOfList()) {
-//                rv_main.post { rv_main.scrollToBottom() }
-//            }
-//        }
+
+
 
 
         scroll.setOnClickListener {
@@ -63,12 +93,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isBottomOfList(): Boolean {
-        val lastVisiblePosition = (rv_main.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-        val lastItemPosition = (rv_main.adapter?.itemCount ?: 0) - 1
-
-        return (lastItemPosition - lastVisiblePosition) < 10
-    }
 }
 
 

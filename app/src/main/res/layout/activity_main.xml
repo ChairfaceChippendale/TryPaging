@@ -18,15 +18,24 @@
             app:reverseLayout="true"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/scroll"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_scroll"
             />
 
     <Button
-            android:id="@+id/scroll"
+            android:id="@+id/btn_scroll"
             android:layout_width="wrap_content"
             android:text="Scroll to bottom"
             android:layout_height="wrap_content" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+            android:id="@+id/btn_update"
+            android:layout_width="wrap_content"
+            android:text="Update"
+            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toEndOf="@+id/btn_scroll"
+            android:layout_marginStart="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

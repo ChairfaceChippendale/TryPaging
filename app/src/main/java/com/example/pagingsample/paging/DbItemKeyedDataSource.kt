@@ -12,7 +12,9 @@ import io.reactivex.schedulers.Schedulers
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DbItemKeyedDataSource(private val employeeDao: EmployeeDao) : ItemKeyedDataSource<Employee, Employee>() {
+class DbItemKeyedDataSource(
+    private val employeeDao: EmployeeDao
+) : ItemKeyedDataSource<Employee, Employee>() {
 
     private val disposable = CompositeDisposable()
 

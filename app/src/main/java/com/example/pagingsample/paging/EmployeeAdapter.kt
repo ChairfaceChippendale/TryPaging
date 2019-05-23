@@ -49,9 +49,6 @@ class EmployeeAdapter :
     }
 
 
-
-
-
     //sticky header
     override fun getHeaderPositionForItem(position: Int): Int {
         var headerPosition = 0
@@ -91,7 +88,6 @@ class EmployeeAdapter :
                     && oldItem.type == newItem.type
         }
     }
-
 
 
     abstract class MessageViewHolder(
