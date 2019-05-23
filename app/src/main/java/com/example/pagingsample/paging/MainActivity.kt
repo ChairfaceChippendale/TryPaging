@@ -29,14 +29,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        rv_main.layoutManager = LinearLayoutManager(this)
+val lm = LinearLayoutManager(this)
+        rv_main.layoutManager = lm
 
         val dataSource =
             App.instance.database.employeeDao().getAll()
 
         val config: PagedList.Config = PagedList.Config.Builder()
-            .setEnablePlaceholders(false)
+            .setEnablePlaceholders(true)
             .setPageSize(10)
             .build()
 
@@ -52,5 +52,9 @@ class MainActivity : AppCompatActivity() {
             )
 
         rv_main.adapter = adapter
+
+        btm_scroll.setOnClickListener {
+            lm.scrollToPositionWithOffset(50, 0)
+        }
     }
 }
