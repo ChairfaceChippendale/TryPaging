@@ -1,12 +1,12 @@
 package com.example.pagingsample.paging
 
 import android.content.res.Resources
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.LayoutRes
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pagingsample.R
@@ -17,8 +17,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class EmployeeAdapter :
-    PagedListAdapter<Employee, EmployeeAdapter.MessageViewHolder>(EmployeeDiffUtilCallback()), StickyListener {
+class MessageAdapter :
+    RecyclerView.Adapter<MessageAdapter.MessageViewHolder>(), StickyListener {
+
+    private val items: MutableList<Employee> = mutableListOf()
 
     private val selectedItemsIds: MutableList<String> by lazy { ArrayList<String>() }
 
@@ -32,8 +34,8 @@ class EmployeeAdapter :
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         holder.bind(
-            model = getItem(position),
-            isSelected = getItem(position)?.id in selectedItemsIds,
+            model = items[position],
+            isSelected = items[position].id in selectedItemsIds,
             click = { id ->
                 val isRemoved = selectedItemsIds.removeAll { it == id }
                 if (!isRemoved) selectedItemsIds.add(id)
@@ -42,18 +44,36 @@ class EmployeeAdapter :
         )
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return getItem(position)?.let {
-            ViewType.getType(it).ordinal
-        } ?: -1
+    override fun getItemViewType(position: Int): Int = ViewType.getType(items[position]).ordinal
+
+    override fun getItemCount(): Int = items.size
+
+
+    fun addItems(items: List<Employee>) {
+        val newItems = ArrayList(this.items).apply { addAll(items) }
+        val diffResult = DiffUtil.calculateDiff(DiffUtilCallback(oldList = this.items, newList = newItems))
+        this.items.clear()
+        this.items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
     }
 
-    //sticky header
+    fun setItems(items: List<Employee>) {
+        val newItems = ArrayList(items)
+        val diffResult = DiffUtil.calculateDiff(DiffUtilCallback(oldList = this.items, newList = newItems))
+        this.items.clear()
+        this.items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    //====== STICKIE ======
+
     override fun getHeaderPositionForItem(position: Int): Int {
         var headerPosition = 0
-        for (i in position downTo 1) {
+        for (i in position until itemCount) {
+//        for (i in position downTo 1) {
             if (isHeader(i)) {
                 headerPosition = i
+//                Log.w("MYTAG", " headerPosition: $position")
                 return headerPosition
             }
         }
@@ -63,31 +83,42 @@ class EmployeeAdapter :
     override fun getHeaderLayout(position: Int): Int = R.layout.vh_date
 
     override fun bindHeaderData(header: View, position: Int) {
+//        Log.w("MYTAG", " bindHeaderData: $position")
         val tv = header.findViewById<TextView>(R.id.tvDate)
-        getItem(position)?.timeMilis?.let {
-            tv.text = formatDate(it, tv.resources)
-        }
+        tv.text = formatDate(items[position].timeMilis)
     }
 
-    override fun isHeader(position: Int): Boolean {
-        return getItem(position)?.type == Employee.Type.MESSAGE_DATE
-    }
+    override fun isHeader(position: Int): Boolean =
+        items[position].type == Employee.Type.MESSAGE_DATE
 
 
-    //diffutils
-    private class EmployeeDiffUtilCallback : DiffUtil.ItemCallback<Employee>() {
 
-        override fun areItemsTheSame(oldItem: Employee, newItem: Employee): Boolean {
-            return oldItem.id == newItem.id
-        }
+    //====== DIFFUTILS ======
 
-        override fun areContentsTheSame(oldItem: Employee, newItem: Employee): Boolean {
+    private inner class DiffUtilCallback(
+        val oldList: List<Employee>,
+        val newList: List<Employee>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize() = oldList.size
+
+        override fun getNewListSize() = newList.size
+
+        override fun areItemsTheSame(firstPos: Int, secondPos: Int) =
+            oldList[firstPos].id == newList[secondPos].id
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = oldList[oldItemPosition]
+            val newItem = newList[newItemPosition]
+
             return oldItem.name == newItem.name
                     && oldItem.timeMilis == newItem.timeMilis
                     && oldItem.type == newItem.type
         }
     }
 
+
+    //========= VH ============
 
     abstract class MessageViewHolder(
         override val containerView: View
@@ -123,11 +154,13 @@ class EmployeeAdapter :
         }
     }
 
-    private fun formatDate(time: Long, res: Resources): String {
+    // ========== OTHER ============
+
+    private fun formatDate(time: Long): String {
         val dateTime = Calendar.getInstance()
         dateTime.timeInMillis = time
 
-        val dateTimeFormatString = "MMMM dd yyyy"
+        val dateTimeFormatString = "dd MMMM yyyy"
 
         return SimpleDateFormat(dateTimeFormatString, Locale.US).format(dateTime.time)
 

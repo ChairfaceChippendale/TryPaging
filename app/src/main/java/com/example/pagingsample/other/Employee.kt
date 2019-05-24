@@ -13,7 +13,7 @@ class Employee(
     companion object {
         fun dateInst(timeMilis: Long) =
             Employee(
-                id = UUID.randomUUID().toString(),
+                id = "DateBubble${timeMilis}",
                 name = "This is just date bubble",
                 timeMilis = timeMilis,
                 type = Type.MESSAGE_DATE

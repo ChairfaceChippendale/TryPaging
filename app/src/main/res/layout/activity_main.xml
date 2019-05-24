@@ -5,6 +5,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorAccent"
         tools:context=".paging.MainActivity">
 
 
@@ -20,8 +21,9 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_scroll"
-            />
+            app:layout_constraintBottom_toTopOf="@+id/btn_add_more"
+            android:background="@android:color/white"
+    />
 
     <Button
             android:id="@+id/btn_scroll"
@@ -36,6 +38,24 @@
             android:text="Update"
             android:layout_height="wrap_content" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toEndOf="@+id/btn_scroll"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginStart="16dp"
+    />
+
+    <Button
+            android:id="@+id/btn_add_more"
+            android:layout_width="wrap_content"
+            android:text="Add one more"
+            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/btn_scroll"/>
+
+    <Button
+            android:id="@+id/btn_load_more"
+            android:layout_width="wrap_content"
+            android:text="Load more"
+            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_update" android:layout_marginStart="16dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

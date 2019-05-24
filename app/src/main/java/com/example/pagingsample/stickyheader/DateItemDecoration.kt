@@ -1,6 +1,7 @@
 package com.example.pagingsample.stickyheader
 
 import android.graphics.Canvas
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,14 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 
 
 class DateItemDecoration(
-    val listener: StickyListener
+    private val listener: StickyListener
 ) : RecyclerView.ItemDecoration() {
 
     var headerHeight: Int = 0
 
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(c, parent, state)
-        val topChild = parent.getChildAt(0) ?: return
+        val topChild = parent.getChildAt(parent.childCount-1) ?: return
 
         val topChildPosition = parent.getChildAdapterPosition(topChild)
         if (topChildPosition == RecyclerView.NO_POSITION) return
@@ -23,7 +24,7 @@ class DateItemDecoration(
         val headerPos = listener.getHeaderPositionForItem(topChildPosition)
         val currentHeader = getHeaderViewForItem(headerPos, parent)
         fixLayoutSize(parent, currentHeader)
-        val contactPoint = currentHeader.getBottom()
+        val contactPoint = currentHeader.bottom
         val childInContact = getChildInContact(parent, contactPoint, headerPos)
 
         if (childInContact != null && listener.isHeader(parent.getChildAdapterPosition(childInContact))) {

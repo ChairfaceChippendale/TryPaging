@@ -15,7 +15,7 @@ import java.util.*
 
 class EmployeeViewHolder(
     override val containerView: View
-) : EmployeeAdapter.MessageViewHolder(containerView) {
+) : MessageAdapter.MessageViewHolder(containerView) {
 
     override fun bind(model: Employee?, isSelected: Boolean, click: (String) -> Unit) {
 

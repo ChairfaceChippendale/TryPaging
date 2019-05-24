@@ -10,22 +10,22 @@ import java.util.*
 
 class DateBubbleViewHolder(
     container: View
-) : EmployeeAdapter.MessageViewHolder(container) {
+) : MessageAdapter.MessageViewHolder(container) {
 
     override fun bind(model: Employee?, isSelected: Boolean, click: (String) -> Unit) {
         model?.let{
-            tvDate.text = formatDate(model.timeMilis, tvDate.resources)
+            tvDate.text = formatDate(model.timeMilis)
         }
     }
 
 
 
 
-    fun formatDate(time: Long, res: Resources): String {
+    fun formatDate(time: Long): String {
         val dateTime = Calendar.getInstance()
         dateTime.timeInMillis = time
 
-        val dateTimeFormatString = "MMMM dd yyyy"
+        val dateTimeFormatString = "dd MMMM yyyy"
 
         return SimpleDateFormat(dateTimeFormatString, Locale.US).format(dateTime.time)
 

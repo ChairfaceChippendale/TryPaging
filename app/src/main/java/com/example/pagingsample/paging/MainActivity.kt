@@ -4,25 +4,29 @@ import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import androidx.paging.PagedList
-import androidx.paging.RxPagedListBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pagingsample.App
 import com.example.pagingsample.R
-import com.example.pagingsample.other.DbItemKeyedDataSourceFactory
+import com.example.pagingsample.database.EmployeeDbEntity
 import com.example.pagingsample.other.Employee
-import io.reactivex.BackpressureStrategy
+import com.example.pagingsample.other.toEmployee
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val adapter: EmployeeAdapter =
-        EmployeeAdapter()
+    private val adapter: MessageAdapter = MessageAdapter()
+
+
+    private var itemSubscriber: Disposable? = null
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,102 +34,34 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-
-        val config: PagedList.Config = PagedList.Config.Builder()
-            .setEnablePlaceholders(false)
-            .setPageSize(10)
-            .build()
-
-        val factory = DbItemKeyedDataSourceFactory(App.instance.database.employeeDao())
-
-        RxPagedListBuilder<Employee, Employee>(factory, config)
-            .setFetchScheduler(Schedulers.newThread())
-            .setNotifyScheduler(AndroidSchedulers.mainThread())
-            .setBoundaryCallback(object :PagedList.BoundaryCallback<Employee>(){
-                override fun onZeroItemsLoaded() {
-                    super.onZeroItemsLoaded()
-                    Log.w("MYTAG", "onZeroItemsLoaded")
-                }
-
-                override fun onItemAtEndLoaded(itemAtEnd: Employee) {
-                    super.onItemAtEndLoaded(itemAtEnd)
-                    Log.w("MYTAG", "onItemAtEndLoaded")
-                }
-
-                override fun onItemAtFrontLoaded(itemAtFront: Employee) {
-                    super.onItemAtFrontLoaded(itemAtFront)
-                    Log.w("MYTAG", "onItemAtFrontLoaded")
-                }
-            })
-            .buildFlowable(BackpressureStrategy.BUFFER)
-            .subscribeBy(
-                onNext = { list ->
-                    Log.w("MYTAG", "paged list")
+        val dao = App.instance.database.employeeDao()
 
 
-                    list.addWeakCallback(null, object: PagedList.Callback(){
-                        override fun onChanged(position: Int, count: Int) {
-                            Log.w("MYTAG", "onChanged pos: $position, count: $count")
-                        }
-
-                        override fun onInserted(position: Int, count: Int) {
-                            Log.w("MYTAG", "onInserted pos: $position, count: $count")
-                            if (count > 30) rv_main.scrollToBottom()
-
-
-                            App.instance.database.employeeDao().observe().skip(1)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeBy(
-                                    onNext = {
-                                        Log.w("MYTAG", "DB changed")
-                                        list.dataSource.invalidate()
-                                    },
-                                    onError = {
-                                        it.printStackTrace()
-                                    }
-                                )
+        val lm = LinearLayoutManager(this)
+        lm.reverseLayout = true
+        rv_main.layoutManager = lm
+        rv_main.adapter = adapter
 
 
 
-                        }
-
-                        override fun onRemoved(position: Int, count: Int) {
-                            Log.w("MYTAG", "onRemoved pos: $position, count: $count")
-                        }
-                    })
-
-                    adapter.submitList(list)
-
-
-                },
-                onError = { it.printStackTrace() }
-            )
-
-
-/*
-
-        employeeDao.observe()
+        itemSubscriber = dao.getLimit(50)
+            .map { list -> list.map { it.toEmployee() }.withDateHeaders() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    Log.w("MYTAG", "DB changed")
-                    d.invalidate()
+//                    Log.w("MYTAG", "Initial load")
+                    adapter.setItems(it)
                 },
                 onError = {
                     it.printStackTrace()
                 }
             )
-*/
-
-        rv_main.layoutManager = LinearLayoutManager(this)
-        rv_main.adapter = adapter
 
 
         btn_update.setOnClickListener {
-            App.instance.database.employeeDao().getById("30")
-                .flatMapCompletable { App.instance.database.employeeDao().updateElement(it.copy(name = "updated"))  }
+            dao.getById("45")
+                .flatMapCompletable { dao.updateElement(it.copy(name = "updated")) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -135,18 +71,76 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_scroll.setOnClickListener {
-            Log.w("MYTAG", "${adapter.itemCount}")
-            rv_main.scrollToPosition(adapter.itemCount-1)//bottom
+//            Log.w("MYTAG", "${adapter.itemCount}")
+            rv_main.scrollToPosition(0)//bottom
 
+        }
+
+        btn_load_more.setOnClickListener {
+
+            itemSubscriber?.dispose()
+            itemSubscriber = dao.getLimit(70)
+                .map { list -> list.map { it.toEmployee() }.withDateHeaders() }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+//                        Log.w("MYTAG", "Iter load")
+                        adapter.setItems(it)
+                    },
+                    onError = {
+                        it.printStackTrace()
+                    }
+                )
+        }
+
+        btn_add_more.setOnClickListener {
+
+            Completable.fromAction {
+                dao.insert(EmployeeDbEntity("2000", "Name last ", 1514757600045L + (9_000_000L * 300)))
+            }
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(
+                    onError = {}
+                )
         }
     }
 
 }
 
 
-fun RecyclerView.scrollToBottom() {
-    adapter?.let { notNullAdapter ->
-        val lastItemPosition = notNullAdapter.itemCount - 1
-        scrollToPosition(lastItemPosition)
+fun List<Employee>.withDateHeaders(): List<Employee> {
+
+    val datedList = ArrayList<Employee>()
+
+    forEachIndexed { index, messageModel ->
+        val next = this.getOrNull(index + 1)
+        if (next == null){
+            datedList.add(messageModel)
+            datedList.add(Employee.dateInst(messageModel.timeMilis + 1)) //to make it less then next item (in case of sort)
+        } else {
+
+            val thisCalendar = Calendar.getInstance().apply {
+                timeInMillis = messageModel.timeMilis
+            }
+
+            val nextCalendar = Calendar.getInstance().apply {
+                timeInMillis = next.timeMilis
+            }
+
+            if ((thisCalendar.get(Calendar.YEAR) == nextCalendar.get(Calendar.YEAR) &&
+                        thisCalendar.get(Calendar.MONTH) == nextCalendar.get(Calendar.MONTH) &&
+                        thisCalendar.get(Calendar.DAY_OF_MONTH) == nextCalendar.get(Calendar.DAY_OF_MONTH)) //check whether the same date day
+            ) {
+                datedList.add(messageModel)
+            } else {
+                datedList.add(messageModel)
+                datedList.add(Employee.dateInst(messageModel.timeMilis + 1)) //to make it less then next item (in case of sort)
+            }
+        }
     }
+
+    return datedList
+
 }
+
