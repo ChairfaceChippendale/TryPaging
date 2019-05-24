@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.room.Room
 import com.example.pagingsample.database.AppDatabase
-import com.example.pagingsample.database.CompanyDbEntity
 import com.example.pagingsample.database.EmployeeDbEntity
 import com.facebook.stetho.Stetho
 import io.reactivex.Completable

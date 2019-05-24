@@ -39,8 +39,18 @@ class MainActivity : AppCompatActivity() {
 
         val lm = LinearLayoutManager(this)
         lm.reverseLayout = true
+        rv_main.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                Log.w("MYTAG", "dy = $dy")
+            }
+
+
+        })
         rv_main.layoutManager = lm
         rv_main.adapter = adapter
+
+
 
 
 
