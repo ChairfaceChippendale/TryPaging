@@ -40,9 +40,21 @@ class MainActivity : AppCompatActivity() {
         val lm = LinearLayoutManager(this)
         lm.reverseLayout = true
         rv_main.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                // 3 lines below are not needed.
+                Log.w("MYTAG","Last visible item is: ${lm.findLastVisibleItemPosition()}")
+//                Log.w("MYTAG","Item count is: ${lm.itemCount}")
+//                Log.w("MYTAG","end? : ${lm.findLastVisibleItemPosition() == lm.itemCount - 1}")
+
+                if (lm.itemCount - lm.findLastVisibleItemPosition() < 5){
+                    Log.e("MYTAG","time to lode more : ${lm.itemCount - lm.findLastVisibleItemPosition()}")
+                }
+
+                if(lm.findLastVisibleItemPosition() == lm.itemCount - 1){
+                    // We have reached the end of the recycler view.
+                }
                 super.onScrolled(recyclerView, dx, dy)
-                Log.w("MYTAG", "dy = $dy")
             }
 
 
