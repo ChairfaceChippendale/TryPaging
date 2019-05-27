@@ -11,6 +11,7 @@ import com.example.pagingsample.R
 import com.example.pagingsample.database.EmployeeDbEntity
 import com.example.pagingsample.other.Employee
 import com.example.pagingsample.other.toEmployee
+import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -27,6 +28,10 @@ class MainActivity : AppCompatActivity() {
 
 
     private var itemSubscriber: Disposable? = null
+    val dao = App.instance.database.employeeDao()
+
+    private var currentNum = 40
+
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,51 +39,41 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        val dao = App.instance.database.employeeDao()
-
 
         val lm = LinearLayoutManager(this)
         lm.reverseLayout = true
-        rv_main.addOnScrollListener(object : RecyclerView.OnScrollListener(){
 
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                // 3 lines below are not needed.
-                Log.w("MYTAG","Last visible item is: ${lm.findLastVisibleItemPosition()}")
+        rv_main.scrollEvents()
+            .map { lm.findLastVisibleItemPosition() }
+            .distinctUntilChanged()
+            .map {
+                Log.w("MYTAG","Last visible item is: $it")
 //                Log.w("MYTAG","Item count is: ${lm.itemCount}")
 //                Log.w("MYTAG","end? : ${lm.findLastVisibleItemPosition() == lm.itemCount - 1}")
 
-                if (lm.itemCount - lm.findLastVisibleItemPosition() < 5){
-                    Log.e("MYTAG","time to lode more : ${lm.itemCount - lm.findLastVisibleItemPosition()}")
+                if (lm.itemCount - it == 3){
+                    Log.e("MYTAG","time to load more : ${lm.itemCount - it}")
+                    return@map true
                 }
-
-                if(lm.findLastVisibleItemPosition() == lm.itemCount - 1){
-                    // We have reached the end of the recycler view.
-                }
-                super.onScrolled(recyclerView, dx, dy)
+                return@map false
             }
+            .subscribeBy(
+                onNext = {
+                    if (it) {
+                        currentNum += 10
+                        load(currentNum)
+                    }
+                },
+                 onError = { it.printStackTrace() }
+            )
 
 
-        })
         rv_main.layoutManager = lm
         rv_main.adapter = adapter
 
 
 
-
-
-        itemSubscriber = dao.getLimit(50)
-            .map { list -> list.map { it.toEmployee() }.withDateHeaders() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onNext = {
-//                    Log.w("MYTAG", "Initial load")
-                    adapter.setItems(it)
-                },
-                onError = {
-                    it.printStackTrace()
-                }
-            )
+        load(currentNum)
 
 
         btn_update.setOnClickListener {
@@ -126,6 +121,28 @@ class MainActivity : AppCompatActivity() {
                     onError = {}
                 )
         }
+    }
+
+
+    private fun load(num: Int){
+        itemSubscriber?.dispose()
+        itemSubscriber =  dao.getLimit(num)
+            .distinctUntilChanged()
+            .map { list ->
+                Log.w("MYTAG", "Load raw: ${list.size}")
+                return@map list.map { it.toEmployee() }.withDateHeaders()
+             }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    Log.w("MYTAG", "Load: ${it.size}")
+                    adapter.setItems(it)
+                },
+                onError = {
+                    it.printStackTrace()
+                }
+            )
     }
 
 }
