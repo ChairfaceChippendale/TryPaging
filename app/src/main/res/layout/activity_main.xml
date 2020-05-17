@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -9,53 +8,57 @@
         tools:context=".paging.MainActivity">
 
 
-    <com.example.pagingsample.stickyheader.StickyRecyclerView
+    <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_main"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:scrollbars="vertical"
-            app:stackFromEnd="true"
-            app:reverseLayout="true"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/btn_add_more"
-            android:background="@android:color/white"
-    />
+            android:background="@android:color/white" />
 
     <Button
             android:id="@+id/btn_scroll"
             android:layout_width="wrap_content"
             android:text="Scroll to bottom"
-            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"/>
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     <Button
             android:id="@+id/btn_update"
             android:layout_width="wrap_content"
             android:text="Update"
-            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toEndOf="@+id/btn_scroll"
-            android:layout_marginStart="16dp"
-    />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_scroll"
+            android:layout_marginStart="16dp" />
 
     <Button
             android:id="@+id/btn_add_more"
             android:layout_width="wrap_content"
             android:text="Add one more"
-            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/btn_scroll"/>
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/btn_scroll" />
 
     <Button
             android:id="@+id/btn_load_more"
             android:layout_width="wrap_content"
             android:text="Load more"
-            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btn_update" android:layout_marginStart="16dp"/>
+            app:layout_constraintStart_toEndOf="@+id/btn_update"
+            android:layout_marginStart="16dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

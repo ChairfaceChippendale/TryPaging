@@ -34,9 +34,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
-//    implementation "androidx.paging:paging-runtime-ktx:2.1.0"
     implementation 'androidx.core:core-ktx:1.0.2'
-//    implementation "androidx.paging:paging-rxjava2-ktx:2.1.0"
 
 
     implementation "io.reactivex.rxjava2:rxjava:2.2.8"

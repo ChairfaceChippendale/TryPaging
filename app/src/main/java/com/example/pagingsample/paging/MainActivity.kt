@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
 
 
         val lm = LinearLayoutManager(this)
-        lm.reverseLayout = true
 
         rv_main.scrollEvents()
             .map { lm.findLastVisibleItemPosition() }
@@ -97,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
             itemSubscriber?.dispose()
             itemSubscriber = dao.getLimit(70)
-                .map { list -> list.map { it.toEmployee() }.withDateHeaders() }
+                .map { list -> list.map { it.toEmployee() } }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -130,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             .distinctUntilChanged()
             .map { list ->
                 Log.w("MYTAG", "Load raw: ${list.size}")
-                return@map list.map { it.toEmployee() }.withDateHeaders()
+                return@map list.map { it.toEmployee() }
              }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -144,42 +143,6 @@ class MainActivity : AppCompatActivity() {
                 }
             )
     }
-
-}
-
-
-fun List<Employee>.withDateHeaders(): List<Employee> {
-
-    val datedList = ArrayList<Employee>()
-
-    forEachIndexed { index, messageModel ->
-        val next = this.getOrNull(index + 1)
-        if (next == null){
-            datedList.add(messageModel)
-            datedList.add(Employee.dateInst(messageModel.timeMilis + 1)) //to make it less then next item (in case of sort)
-        } else {
-
-            val thisCalendar = Calendar.getInstance().apply {
-                timeInMillis = messageModel.timeMilis
-            }
-
-            val nextCalendar = Calendar.getInstance().apply {
-                timeInMillis = next.timeMilis
-            }
-
-            if ((thisCalendar.get(Calendar.YEAR) == nextCalendar.get(Calendar.YEAR) &&
-                        thisCalendar.get(Calendar.MONTH) == nextCalendar.get(Calendar.MONTH) &&
-                        thisCalendar.get(Calendar.DAY_OF_MONTH) == nextCalendar.get(Calendar.DAY_OF_MONTH)) //check whether the same date day
-            ) {
-                datedList.add(messageModel)
-            } else {
-                datedList.add(messageModel)
-                datedList.add(Employee.dateInst(messageModel.timeMilis + 1)) //to make it less then next item (in case of sort)
-            }
-        }
-    }
-
-    return datedList
 
 }
 
