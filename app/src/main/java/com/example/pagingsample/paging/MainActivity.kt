@@ -59,8 +59,7 @@ class MainActivity : AppCompatActivity() {
             .subscribeBy(
                 onNext = {
                     if (it) {
-                        currentNum += 10
-                        load(currentNum)
+                        load(10, adapter.itemCount)
                     }
                 },
                  onError = { it.printStackTrace() }
@@ -71,10 +70,13 @@ class MainActivity : AppCompatActivity() {
         rv_main.adapter = adapter
 
 
+        load(currentNum, 0)
 
-        load(currentNum)
 
+        setupControls()
+    }
 
+    private fun setupControls(){
         btn_update.setOnClickListener {
             dao.getById("45")
                 .flatMapCompletable { dao.updateElement(it.copy(name = "updated")) }
@@ -123,9 +125,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun load(num: Int){
+    private fun load(num: Int, offset: Int){
         itemSubscriber?.dispose()
-        itemSubscriber =  dao.getLimit(num)
+        itemSubscriber =  dao.getLimitOffset(num, offset)
             .distinctUntilChanged()
             .map { list ->
                 Log.w("MYTAG", "Load raw: ${list.size}")
@@ -136,7 +138,7 @@ class MainActivity : AppCompatActivity() {
             .subscribeBy(
                 onNext = {
                     Log.w("MYTAG", "Load: ${it.size}")
-                    adapter.setItems(it)
+                    adapter.addItems(it)
                 },
                 onError = {
                     it.printStackTrace()

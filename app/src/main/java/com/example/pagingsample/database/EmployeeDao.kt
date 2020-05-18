@@ -35,6 +35,9 @@ interface EmployeeDao {
     @Query("SELECT * FROM employee ORDER BY date DESC LIMIT :initCount")
     fun getLimit(initCount: Int): Flowable<List<EmployeeDbEntity>>
 
+    @Query("SELECT * FROM employee ORDER BY date DESC LIMIT :initCount OFFSET :offset")
+    fun getLimitOffset(initCount: Int, offset: Int): Flowable<List<EmployeeDbEntity>>
+
     @Query("SELECT * FROM employee WHERE date >= :from AND date <= :to ORDER BY date DESC")
     fun getRange(from: Long = 0, to: Long): Flowable<List<EmployeeDbEntity>>
 
